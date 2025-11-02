@@ -1,0 +1,314 @@
+  rule_engines = [
+#    {
+#      rule_name = "test_1"
+#      status = "enable"
+#      rules = [
+#        {
+#          actions = [
+#            {
+#              normal_action = [
+#                {
+#                  action     = "ClientIpHeader"
+#                  parameters = [
+#                    {
+#                      name   = "Switch"
+#                      values = ["on"]
+#                    },
+#                    {
+#                      name   = "HeaderName"
+#                      values = ["x-ttcdn-real-ip"]
+#                    },
+#                  ]
+#                },
+#                #                {
+#                #                  action     = "UpstreamUrlRedirect"
+#                #                  parameters = [
+#                #                    {
+#                #                      name   = "Type"
+#                #                      values = ["Path"]
+#                #                    },
+#                #                    {
+#                #                      name   = "Action"
+#                #                      values = ["addPrefix"]
+#                #                    },
+#                #                    {
+#                #                      name   = "Value"
+#                #                      values = ["/testurl"]
+#                #                    }
+#                #                  ]
+#                #                }
+#              ]
+#            }
+#          ]
+#          or = [
+#            [
+#              {
+#                ignore_case = "false"
+#                operator    = "equal"
+#                target      = "host"
+#                values      = [
+#                  "nginx-1.overseas.com",
+#                  "nginx-1.overseas.com"
+#                ]
+#              },
+#              {
+#                ignore_case = "false"
+#                operator    = "equal"
+#                target      = "url"
+#                values      = [
+#                  "/testurl",
+#                ]
+#              }
+#            ],
+#            [
+#              {
+#                ignore_case = "false"
+#                operator    = "equal"
+#                target      = "url"
+#                values      = [
+#                  "/",
+#                ]
+#              }
+#            ]
+#          ]
+#          sub_rules = [
+#            {
+#              rules = [
+#                {
+#                  actions = [
+#                    {
+#                      normal_action = [
+#                        {
+#                          action     = "Cache"
+#                          parameters = [
+#                            {
+#                              name   = "CacheTime"
+#                              values = ["5400"]
+#                            },
+#                            {
+#                              name   = "IgnoreCacheControl"
+#                              values = ["on"]
+#                            },
+#                            {
+#                              name   = "Switch"
+#                              values = ["on"]
+#                            },
+#                            {
+#                              name   = "Type"
+#                              values = ["Cache"]
+#                            }
+#
+#                          ]
+#                        },
+#                      ]
+#                    }
+#                  ]
+#                  or = [
+#                    [
+#                      {
+#                        ignore_case = "false"
+#                        operator    = "equal"
+#                        target      = "url"
+#                        values      = [
+#                          "/rest/v2/*/category", "/rest/v2/*/currentsite", "/rest/v2/*/i18n/chunk/*",
+#                        ]
+#                      }
+#                    ],
+#                    [
+#                      {
+#                        ignore_case = "false"
+#                        operator    = "equal"
+#                        target      = "url"
+#                        values      = [
+#                          "/testurl",
+#                        ]
+#                      }
+#                    ]
+#                  ]
+#                },
+#                #                {
+#                #                  actions = [
+#                #                    {
+#                #                      normal_action = [
+#                #                        {
+#                #                          action = "OfflineCache"
+#                #                          parameters = [
+#                #                            {
+#                #                              name = "Switch",
+#                #                              values = ["on"],
+#                #                            },
+#                #                          ]
+#                #                        }
+#                #                      ]
+#                #                    }
+#                #                  ]
+#                #                }
+#              ]
+#              tags = ["duplicate with main rule"]
+#            },
+#            {
+#              rules = [
+#                {
+#                  actions = [
+#                    {
+#                      normal_action = [
+#                        {
+#                          action     = "Cache"
+#                          parameters = [
+#                            {
+#                              name   = "CacheTime"
+#                              values = ["86400"]
+#                            },
+#                            {
+#                              name   = "IgnoreCacheControl"
+#                              values = ["on"]
+#                            },
+#                            {
+#                              name   = "Switch"
+#                              values = ["on"]
+#                            },
+#                            {
+#                              name   = "Type"
+#                              values = ["Cache"]
+#                            }
+#
+#                          ]
+#                        },
+#                      ]
+#                    }
+#                  ]
+#                  or = [
+#                    [
+#                      {
+#                        ignore_case = "false"
+#                        operator    = "equal"
+#                        target      = "extension"
+#                        values      = [
+#                          "aif", "aiff", "au", "avi",
+#                        ]
+#                      }
+#                    ]
+#                  ]
+#                },
+#                {
+#                  actions = [
+#                    {
+#                      normal_action = [
+#                        {
+#                          action = "UpstreamRequest"
+#                          parameters = [
+#                            {
+#                              name = "Type",
+#                              values = ["Cookie"],
+#                            },
+#                            {
+#                              name = "Switch",
+#                              values = ["on"]
+#                            },
+#                            {
+#                              name = "Value",
+#                              values = []
+#                            },
+#                            {
+#                              name = "Action",
+#                              values = ["full"]
+#                            }
+#                          ]
+#                        }
+#                      ]
+#                    }
+#                  ]
+#                  or = [
+#                    [
+#                      {
+#                        ignore_case = false
+#                        operator    = "equal"
+#                        target      = "extension"
+#                        values      = [".avi"]
+#                      }
+#                    ]
+#                  ]
+#                },
+#              ]
+#              tags = ["one more sub rule"]
+#            }
+#          ]
+#        }
+#      ]
+#    },
+#    {
+#      rule_name = "test_2"
+#      status = "enable"
+#      rules = [
+#        {
+#          actions = [
+#            {
+#              normal_action = [
+#                {
+#                  action     = "ClientIpHeader"
+#                  parameters = [
+#                    {
+#                      name   = "Switch"
+#                      values = ["on"]
+#                    },
+#                    {
+#                      name   = "HeaderName"
+#                      values = ["x-ttcdn-real-ip"]
+#                    },
+#                  ]
+#                },
+#                #                {
+#                #                  action     = "UpstreamUrlRedirect"
+#                #                  parameters = [
+#                #                    {
+#                #                      name   = "Type"
+#                #                      values = ["Path"]
+#                #                    },
+#                #                    {
+#                #                      name   = "Action"
+#                #                      values = ["addPrefix"]
+#                #                    },
+#                #                    {
+#                #                      name   = "Value"
+#                #                      values = ["/testurl"]
+#                #                    }
+#                #                  ]
+#                #                }
+#              ]
+#            }
+#          ]
+#          or = [
+#            [
+#              {
+#                ignore_case = "false"
+#                operator    = "equal"
+#                target      = "host"
+#                values      = [
+#                  "nginx-1.overseas.com",
+#                  "nginx-1.overseas.com"
+#                ]
+#              },
+#              {
+#                ignore_case = "false"
+#                operator    = "equal"
+#                target      = "url"
+#                values      = [
+#                  "/testurl",
+#                ]
+#              }
+#            ],
+#            [
+#              {
+#                ignore_case = "false"
+#                operator    = "equal"
+#                target      = "url"
+#                values      = [
+#                  "/",
+#                ]
+#              }
+#            ]
+#          ]
+#        }
+#      ]
+#    },
+  ]

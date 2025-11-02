@@ -1,0 +1,184 @@
+  l7_acc_rules = [
+
+    {
+      rule_name   = "cache"
+      description = ["cache-index"]
+      branches = [
+        {
+          condition = "$${http.request.host} in ['${format("%s-singapore.%s", local.prefix, local.zone_name)}']"
+          description = ["with sub rules"]
+          actions = [
+            {
+              name             = "Cache"
+              cache_parameters = {
+                follow_origin = {
+                  default_cache          = "on"
+                  default_cache_strategy = "on"
+                  default_cache_time     = 0
+                  switch                 = "on"
+                }
+              }
+            },
+          ]
+          sub_rules = [
+            {
+              description = ["sub rule 1"]
+              branches = [
+                {
+                  condition = "$${http.request.uri.path} in ['/urlpath', '/urlpath1']"
+                  actions = [
+                    {
+                      name                 = "CacheKey"
+                      cache_key_parameters = {
+                        full_url_cache = "on"
+                        scheme         = "on"
+                        query_string   = {
+                          switch = "off"
+                          values = []
+                        }
+                      }
+                    },
+                    {
+                      name                         = "StatusCodeCache"
+                      status_code_cache_parameters = {
+                        status_code_cache_params = [
+                          {
+                            cache_time  = 0
+                            status_code = 400
+                          },
+                          {
+                            cache_time  = 2
+                            status_code = 401
+                          }
+                        ]
+                      }
+                    },
+                  ]
+                },
+              ]
+            },
+            {
+              description = ["sub rule 2"]
+              branches = [
+                {
+                  condition = "$${http.request.uri.args['aaa']} in ['bbb']"
+                  actions = [
+                    {
+                      name                 = "CacheKey"
+                      cache_key_parameters = {
+                        full_url_cache = "on"
+                        scheme         = "on"
+                        query_string   = {
+                          switch = "off"
+                          values = []
+                        }
+                      }
+                    },
+                  ]
+                },
+              ]
+            },
+            {
+              description = ["final"]
+              branches = [
+                {
+                  condition = "$${http.request.host} matches '.*'"
+                  actions = [
+                    {
+                      name                 = "CacheKey"
+                      cache_key_parameters = {
+                        full_url_cache = "on"
+                        scheme         = "on"
+                        query_string   = {
+                          switch = "off"
+                          values = []
+                        }
+                      }
+                    },
+                  ]
+                },
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      rule_name   = "网站加速"
+      description = ["1"]
+      branches    = [
+        {
+          condition   = "$${http.request.host} in ['aaa.makn.cn']"
+          description = ["normal"]
+          actions     = [
+            {
+              name                           = "AccessURLRedirect"
+              access_url_redirect_parameters = {
+                protocol    = "follow"
+                status_code = 302
+                host_name   = {
+                  action = "follow"
+                }
+                query_string = {
+                  action = "full"
+                }
+                url_path = {
+                  action = "follow"
+                }
+              }
+            },
+            {
+              name             = "Cache"
+              cache_parameters = {
+                follow_origin = {
+                  default_cache          = "on"
+                  default_cache_strategy = "on"
+                  default_cache_time     = 0
+                  switch                 = "on"
+                }
+              }
+            },
+            {
+              name               = "MaxAge"
+              max_age_parameters = {
+                cache_time    = 0
+                follow_origin = "off"
+              }
+            },
+            {
+              name                 = "CacheKey"
+              cache_key_parameters = {
+                full_url_cache = "on"
+                scheme         = "on"
+                query_string   = {
+                  switch = "off"
+                  values = []
+                }
+              }
+            },
+            {
+              name                         = "StatusCodeCache"
+              status_code_cache_parameters = {
+                status_code_cache_params = [
+                  {
+                    cache_time  = 0
+                    status_code = 400
+                  },
+                  {
+                    cache_time  = 2
+                    status_code = 401
+                  }
+                ]
+              }
+            },
+            {
+              name                     = "OfflineCache"
+              offline_cache_parameters = {
+                status = "on"
+              }
+            }
+          ]
+        },
+      ]
+    },
+  ]
