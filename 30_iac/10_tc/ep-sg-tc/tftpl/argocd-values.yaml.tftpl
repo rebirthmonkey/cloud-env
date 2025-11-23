@@ -1,0 +1,15 @@
+global:
+  domain: ${ARGOCD_DOMAIN}
+
+configs:
+  params:
+    server.insecure: true
+
+server:
+  service:
+    annotations:
+      service.kubernetes.io/tke-existed-lbid: ${ARGOCD_CLB_ID}
+      service.cloud.tencent.com/specify-protocol: '{"443":{"protocol":["TCP_SSL"],"tls":"argocd-dashboard"}}'
+    type: LoadBalancer
+  ingress:
+    enabled: false

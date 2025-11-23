@@ -1,0 +1,63 @@
+image:
+  repository: nanjing-tamlab-1.tencentcloudcr.com/images/atlantis
+  tag: v0.34.0
+  pullPolicy: IfNotPresent
+imagePullSecrets:
+  - tencentcr
+orgAllowlist: "${GITLAB_DOMAIN}/*"
+orgWhitelist: "${GITLAB_DOMAIN}/*"
+logLevel: "debug"
+gitlab:
+  user: "{GITLAB_USER}"
+  secret: "{GITLAB_SECRET}"
+  token: "{GITLAB_TOKEN}"
+  hostname: "${GITLAB_DOMAIN}"
+basicAuth:
+  username: "${ATLANTIS_USERNAME}"
+  password: "${ATLANTIS_PASSWORD}"
+service:
+  type: LoadBalancer
+  port: 443
+  annotations:
+    service.kubernetes.io/tke-existed-lbid: ${ATLANTIS_CLB_ID}
+    service.cloud.tencent.com/specify-protocol: '{"443":{"protocol":["TCP_SSL"],"tls":"atlantis-dashboard"}}'
+ingress:
+  enabled: false
+storageClassName: "cbs"
+serviceAccount:
+  create: false
+  mount: true
+  name: "service-account-ep-sg"
+volumeClaim:
+  enabled: true
+  dataStorage: 50Gi
+  storageClassName: "cbs"
+  accessModes: ["ReadWriteOnce"]
+repoConfig: |
+  ---
+  repos:
+    - id: /.*/
+      allowed_overrides: ["workflow", "delete_source_branch_on_merge", "apply_requirements", "repo_locking", "repo_locks", "custom_policy_check"]
+      allow_custom_workflows: true
+
+extraVolumes:
+  - name: aws-oidc-token
+    projected:
+      sources:
+        - serviceAccountToken:
+            audience: sts.amazonaws.com
+            expirationSeconds: 3600
+            path: token
+
+extraVolumeMounts:
+  - name: aws-oidc-token
+    mountPath: /var/run/secrets/aws.com/serviceaccount
+    readOnly: true
+
+environment:
+  AWS_ROLE_ARN: arn:aws:iam::976193240663:role/role_dev-bu0-iac
+  AWS_WEB_IDENTITY_TOKEN_FILE: /var/run/secrets/aws.com/serviceaccount/token
+  AWS_DEFAULT_REGION: ap-southeast-1
+  AWS_STS_REGIONAL_ENDPOINTS: regional
+  AWS_DURATION_SECONDS: "43200"
+  TF_CLI_CONFIG_FILE: /atlantis-data/home/atlantis/.terraformrc

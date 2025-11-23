@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: com.tencent.cloud.csi.cbs
+    volume.kubernetes.io/storage-provisioner: com.tencent.cloud.csi.cbs
+  finalizers:
+  - kubernetes.io/pvc-protection
+  labels:
+    app.kubernetes.io/component: primary
+  name: atlantis-data
+  namespace: atlantis
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: "50Gi"
+  storageClassName: cbs
+  volumeMode: Filesystem

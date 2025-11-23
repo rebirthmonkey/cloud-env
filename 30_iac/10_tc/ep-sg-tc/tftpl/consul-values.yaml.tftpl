@@ -1,0 +1,17 @@
+global:
+  name: consul
+  acls:
+    manageSystemACLs: true
+    createBootstrapSecret: true
+
+ui:
+  enabled: true
+  service:
+    enabled: true
+    type: LoadBalancer
+    port:
+      http: 443
+    annotations: |
+      service.kubernetes.io/tke-existed-lbid: ${CONSUL_CLB_ID}
+      service.cloud.tencent.com/specify-protocol: '{"443":{"protocol":["TCP_SSL"],"tls":"consul-dashboard"}}'
+

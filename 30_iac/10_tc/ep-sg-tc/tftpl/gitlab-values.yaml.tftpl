@@ -1,0 +1,65 @@
+global:
+  hosts:
+    domain: ${GITLAB_DOMAIN}
+    registry:
+      name: registry.gitlab-ops-ep-sg.overseasops.com
+      protocol: https
+  ingress:
+    configureCertmanager: false
+    tls:
+      enabled: true
+      secretName: gitlab-dashboard
+    annotations:
+      "kubernetes.io/tls-acme": "true"
+    
+registry:
+  ingress:
+    tls:
+      enabled: true
+      secretName: gitlab-registry
+    
+redis:
+  master:
+    persistence:
+      size: 20Gi
+postgresql:
+  image:
+    tag: 16.6.0
+  primary:
+    persistence:
+      size: 100Gi
+prometheus:
+  server:
+    persistentVolume:
+      size: 50Gi
+nginx-ingress:
+  controller:
+    service:
+      annotations:
+        service.kubernetes.io/tke-existed-lbid: ${GITLAB_CLB_ID}
+
+certmanager-issuer:
+  email: "${GITLAB_ISSUER_EMAIL}"
+
+certmanager:
+  install: false
+
+gitlab-runner:
+  install: true
+  rbac:
+    create: true
+  serviceAccountName: gitlab-runner-oidc
+  runners:
+    config: |
+      [[runners]]
+        [runners.kubernetes]
+          image = "ubuntu:22.04"
+          privileged = true
+          service_account = "gitlab-runner-oidc"
+        [[runners.kubernetes.volumes.empty_dir]]
+          name = "docker-certs"
+          mount_path = "/certs/client"
+          medium = "Memory"
+    locked: false
+    secret: nonempty
+

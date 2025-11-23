@@ -1,0 +1,115 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: atlantis-provider-init
+  namespace: atlantis
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init-providers
+          image: alpine:3.19
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              set -euo pipefail
+
+              echo "==> Installing curl & unzip..."
+              apk add --no-cache curl unzip
+
+              CACHE_ROOT="/atlantis-data/plugin-cache"
+              HOME_DIR="/atlantis-data/home/atlantis"
+
+              echo "==> Preparing HOME dir: $${HOME_DIR}"
+              mkdir -p "$${HOME_DIR}"
+              chown -R 1000:1000 "$${HOME_DIR}"
+
+              echo "==> Writing $${HOME_DIR}/.terraformrc"
+              # 用 printf 避免 heredoc，在 YAML 里不容易出问题
+              printf '%s\n' \
+                'provider_installation {' \
+                '  filesystem_mirror {' \
+                '    path    = "/atlantis-data/plugin-cache/"' \
+                '    include = ["registry.opentofu.org/*/*", "registry.terraform.io/*/*"]' \
+                '  }' \
+                '  direct {' \
+                '    exclude = ["registry.opentofu.org/*/*", "registry.terraform.io/*/*"]' \
+                '  }' \
+                '}' > "$${HOME_DIR}/.terraformrc"
+
+              chown 1000:1000 "$${HOME_DIR}/.terraformrc"
+
+              echo "==> Preparing cache root: $${CACHE_ROOT}"
+              mkdir -p "$${CACHE_ROOT}"
+              cd /tmp
+
+              echo "==> Downloading providers to $${CACHE_ROOT}"
+
+              # ---- aws 6.21.0 ----
+              mkdir -p "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/aws/6.21.0/linux_amd64"
+              curl -L -o terraform-provider-aws_6.21.0_linux_amd64.zip \
+                https://releases.hashicorp.com/terraform-provider-aws/6.21.0/terraform-provider-aws_6.21.0_linux_amd64.zip
+              unzip -o terraform-provider-aws_6.21.0_linux_amd64.zip \
+                -d "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/aws/6.21.0/linux_amd64"
+              chmod +x "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/aws/6.21.0/linux_amd64"/terraform-provider-aws* || true
+              rm -f terraform-provider-aws_6.21.0_linux_amd64.zip
+
+              # ---- local 2.6.1 ----
+              mkdir -p "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/local/2.6.1/linux_amd64"
+              curl -L -o terraform-provider-local_2.6.1_linux_amd64.zip \
+                https://releases.hashicorp.com/terraform-provider-local/2.6.1/terraform-provider-local_2.6.1_linux_amd64.zip
+              unzip -o terraform-provider-local_2.6.1_linux_amd64.zip \
+                -d "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/local/2.6.1/linux_amd64"
+              chmod +x "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/local/2.6.1/linux_amd64"/terraform-provider-local* || true
+              rm -f terraform-provider-local_2.6.1_linux_amd64.zip
+
+              # ---- null 3.2.4 ----
+              mkdir -p "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/null/3.2.4/linux_amd64"
+              curl -L -o terraform-provider-null_3.2.4_linux_amd64.zip \
+                https://releases.hashicorp.com/terraform-provider-null/3.2.4/terraform-provider-null_3.2.4_linux_amd64.zip
+              unzip -o terraform-provider-null_3.2.4_linux_amd64.zip \
+                -d "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/null/3.2.4/linux_amd64"
+              chmod +x "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/null/3.2.4/linux_amd64"/terraform-provider-null* || true
+              rm -f terraform-provider-null_3.2.4_linux_amd64.zip
+
+              # ---- random 3.7.2 ----
+              mkdir -p "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/random/3.7.2/linux_amd64"
+              curl -L -o terraform-provider-random_3.7.2_linux_amd64.zip \
+                https://releases.hashicorp.com/terraform-provider-random/3.7.2/terraform-provider-random_3.7.2_linux_amd64.zip
+              unzip -o terraform-provider-random_3.7.2_linux_amd64.zip \
+                -d "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/random/3.7.2/linux_amd64"
+              chmod +x "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/random/3.7.2/linux_amd64"/terraform-provider-random* || true
+              rm -f terraform-provider-random_3.7.2_linux_amd64.zip
+
+              # ---- tls 4.1.0 ----
+              mkdir -p "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/tls/4.1.0/linux_amd64"
+              curl -L -o terraform-provider-tls_4.1.0_linux_amd64.zip \
+                https://releases.hashicorp.com/terraform-provider-tls/4.1.0/terraform-provider-tls_4.1.0_linux_amd64.zip
+              unzip -o terraform-provider-tls_4.1.0_linux_amd64.zip \
+                -d "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/tls/4.1.0/linux_amd64"
+              chmod +x "$${CACHE_ROOT}/registry.opentofu.org/hashicorp/tls/4.1.0/linux_amd64"/terraform-provider-tls* || true
+              rm -f terraform-provider-tls_4.1.0_linux_amd64.zip
+
+              # ---- tencentcloud 1.82.2 ----
+              mkdir -p "$${CACHE_ROOT}/registry.opentofu.org/tencentcloudstack/tencentcloud/1.82.2/linux_amd64"
+              curl -L -o terraform-provider-tencentcloud_1.82.2_linux_amd64.zip \
+                https://releases.hashicorp.com/terraform-provider-tencentcloud/1.82.2/terraform-provider-tencentcloud_1.82.2_linux_amd64.zip
+              unzip -o terraform-provider-tencentcloud_1.82.2_linux_amd64.zip \
+                -d "$${CACHE_ROOT}/registry.opentofu.org/tencentcloudstack/tencentcloud/1.82.2/linux_amd64"
+              chmod +x "$${CACHE_ROOT}/registry.opentofu.org/tencentcloudstack/tencentcloud/1.82.2/linux_amd64"/terraform-provider-tencentcloud* || true
+              rm -f terraform-provider-tencentcloud_1.82.2_linux_amd64.zip
+
+              echo
+              echo "==> Providers & .terraformrc prepared successfully."
+          volumeMounts:
+            - name: atlantis-data
+              mountPath: /atlantis-data
+      volumes:
+        - name: atlantis-data
+          persistentVolumeClaim:
+            claimName: atlantis-data
+
